@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>AI Material Classification</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      :root {
+        --bg: #050816;
+        --card-bg: #0b1020;
+        --accent: {{ theme_color or "#00d4ff" }};
+        --text-main: #f9fafb;
+        --text-muted: #9ca3af;
+        --border-subtle: #1f2937;
+      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body {
+        min-height: 100vh;
+        background: radial-gradient(circle at top, #0f172a, #020617 55%);
+        font-family: Poppins, system-ui, sans-serif;
+        color: var(--text-main);
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding: 20px;
+      }
+      .container {
+        width: 100%;
+        max-width: 1100px;
+        background: #020617;
+        border-radius: 24px;
+        padding: 24px 24px 32px;
+        border: 1px solid rgba(148, 163, 184, 0.3);
+        box-shadow: 0 24px 80px rgba(15, 23, 42, 0.9);
+      }
+      header { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 18px; }
+      .title-block h1 { font-size: 26px; }
+      .title-block p { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
+      .pill {
+        padding: 6px 12px; border-radius: 999px; border: 1px solid rgba(148,163,184,0.5);
+        font-size: 11px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-muted);
+        display: inline-flex; align-items: center; gap: 6px;
+      }
+      .pill-dot { width: 7px; height: 7px; border-radius: 999px; background: var(--accent); box-shadow: 0 0 12px var(--accent); }
+      .upload-card {
+        margin-top: 8px; background: #020617; border-radius: 18px; border: 1px solid var(--border-subtle);
+        padding: 16px 18px; display: flex; flex-wrap: wrap; align-items: center; gap: 16px;
+      }
+      .file-input-wrapper {
+        display: inline-flex; align-items: center; gap: 8px; padding: 8px 10px;
+        background: rgba(15,23,42,0.9); border-radius: 999px; border: 1px dashed rgba(148,163,184,0.6);
+      }
+      .file-input-wrapper input[type="file"] { font-size: 12px; color: var(--text-muted); }
+      .btn-primary {
+        cursor: pointer; padding: 9px 16px; border-radius: 999px; font-size: 13px; font-weight: 500;
+        background: var(--accent); color: #020617; border: none;
+      }
+      .btn-secondary {
+        padding: 8px 14px; border-radius: 999px; font-size: 12px; cursor: pointer;
+        background: rgba(15,23,42,0.9); border: 1px solid rgba(148,163,184,0.5); color: var(--text-main);
+      }
+      .btn-camera {
+        padding: 8px 14px; border-radius: 999px; font-size: 12px; cursor: pointer;
+        background: #00c3ff; border: none; color: #020617; font-weight: 600;
+      }
+      main { margin-top: 20px; display: grid; grid-template-columns: minmax(0,1.1fr) minmax(0,1fr); gap: 18px; }
+      @media (max-width: 900px) { main { grid-template-columns: 1fr; } }
+      .panel { background: rgba(15,23,42,0.95); border-radius: 18px; border: 1px solid var(--border-subtle); padding: 14px 16px 16px; }
+      .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+      .panel-header h2 { font-size: 15px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-muted); }
+      .chip { font-size: 11px; padding: 3px 8px; border-radius: 999px; border: 1px solid rgba(148,163,184,0.4); color: var(--text-muted); }
+      .result-text { font-size: 14px; margin-bottom: 8px; }
+      .stats-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; margin: 10px 0 12px; }
+      .stat-card { border-radius: 12px; padding: 8px 10px; background: #101727; border: 1px solid rgba(51,65,85,0.8); }
+      .stat-label { font-size: 11px; color: var(--text-muted); }
+      .stat-value { font-size: 14px; font-weight: 600; margin-top: 4px; }
+      .items-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 12px; }
+      .items-table th, .items-table td { padding: 6px 8px; border-bottom: 1px solid rgba(31,41,55,0.8); text-align:left; }
+      .image-wrapper { margin-top: 12px; max-height: 340px; border-radius: 14px; overflow: hidden; border: 1px solid rgba(31,41,55,0.9); background:#020617; display:flex; justify-content:center; align-items:center; }
+      .image-wrapper img { max-width: 100%; max-height: 340px; }
+      .charts-row { margin-top: 12px; display:flex; flex-wrap:wrap; gap:10px; }
+      .charts-row img { flex:1 1 150px; max-width: 48%; border-radius: 12px; border: 1px solid rgba(31,41,55,0.9); background:#020617; }
+      .detail-list { margin-top: 6px; max-height: 310px; overflow-y: auto; padding-right: 4px; }
+      .material-card { border-radius: 12px; padding: 8px 10px; border: 1px solid rgba(31,41,55,0.9); background:#112031; margin-bottom: 8px; font-size: 12px; }
+      .material-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 3px; }
+      .material-name { font-weight: 600; font-size: 13px; }
+      .material-count { font-size: 11px; color: var(--text-muted); }
+      .material-meta { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 3px; }
+      .badge { font-size: 10px; padding: 3px 7px; border-radius: 999px; border: 1px solid rgba(148,163,184,0.5); }
+      .badge-green { border-color: rgba(34,197,94,0.9); color: #bbf7d0; }
+      .badge-red { border-color: rgba(248,113,113,0.9); color: #fecaca; }
+      .material-note { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+      .material-action { font-size: 11px; color: #d1fae5; margin-top: 2px; }
+      .panel-footer { margin-top: 10px; display: flex; justify-content: flex-end; }
+      .empty-state { font-size: 12px; color: var(--text-muted); }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <div class="title-block">
+          <h1>AI Material Classification</h1>
+          <p>
+            Upload an image or use camera to analyse material, recycling impact,
+            and scrap.
+          </p>
+        </div>
+      </header>
+
+      <section class="upload-card">
+        <form method="POST" action="/predict" enctype="multipart/form-data">
+          <div class="file-input-wrapper">
+            <input type="file" name="image" accept="image/*" required />
+          </div>
+          <button class="btn-primary" type="submit">
+            Run Classification →
+          </button>
+        </form>
+        <button
+          class="btn-secondary"
+          type="button"
+          onclick="window.location.href='/'"
+        >
+          Reset
+        </button>
+        <button
+          class="btn-camera"
+          type="button"
+          onclick="window.location.href='/camera'"
+        >
+          📸 Open Camera
+        </button>
+      </section>
+
+      <main>
+        <section class="panel">
+          <div class="panel-header">
+            <h2>Detection & Preview</h2>
+            <span class="chip">Model: YOLOv8 + MaterialNet</span>
+          </div>
+
+          {% if result_text %}
+          <div>
+            <div class="result-text">
+              <strong>Summary:</strong> {{ result_text }}
+            </div>
+
+            {% if totals %}
+            <div class="stats-grid">
+              <div class="stat-card">
+                <div class="stat-label">Total Items</div>
+                <div class="stat-value">{{ totals.total_items }}</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">Recyclable %</div>
+                <div class="stat-value">
+                  {{ '%.1f'|format(totals.recyclable_percent) }}%
+                </div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">Est. Total Weight</div>
+                <div class="stat-value">
+                  {{ '%.2f'|format(totals.total_weight_kg) }} kg
+                </div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">Est. Scrap Value</div>
+                <div class="stat-value">
+                  ₹{{ '%.1f'|format(totals.total_scrap_value) }}
+                </div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">Sustainability Score</div>
+                <div class="stat-value">
+                  {{ '%.1f'|format(totals.sustainability_score) }}/100
+                </div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">CO₂ Saved (est.)</div>
+                <div class="stat-value">
+                  {{ '%.2f'|format(totals.co2_saved_kg) }} kg
+                </div>
+              </div>
+            </div>
+            {% endif %} {% if table %}
+            <table class="items-table">
+              <thead>
+                <tr>
+                  <th>Material</th>
+                  <th>Count</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in table %}
+                <tr>
+                  <td>{{ row.class }}</td>
+                  <td>{{ row.count }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+            {% endif %} {% if output_image %}
+            <div class="image-wrapper">
+              <img src="{{ output_image }}" alt="Detection result" />
+            </div>
+            {% endif %} {% if heatmap_image %}
+            <div class="image-wrapper" style="margin-top: 10px">
+              <img src="{{ heatmap_image }}" alt="Heatmap view" />
+            </div>
+            {% endif %} {% if pie_chart or bar_chart %}
+            <div class="charts-row">
+              {% if pie_chart %}
+              <img src="{{ pie_chart }}" alt="Material distribution chart" />
+              {% endif %} {% if bar_chart %}
+              <img src="{{ bar_chart }}" alt="Scrap value chart" />
+              {% endif %}
+            </div>
+            {% endif %}
+          </div>
+          {% else %}
+          <p class="empty-state">
+            Upload an image or open camera to see detections, charts and impact.
+          </p>
+          {% endif %}
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <h2>Material Insights</h2>
+            <span class="chip">Recyclability · Disposal · Smart Actions</span>
+          </div>
+
+          {% if material_details %}
+          <div class="detail-list">
+            {% for m in material_details %}
+            <div class="material-card">
+              <div class="material-header">
+                <div class="material-name">{{ m.class }}</div>
+                <div class="material-count">
+                  {{ m.count }} item{% if m.count > 1 %}s{% endif %}
+                </div>
+              </div>
+              <div class="material-meta">
+                <span
+                  class="badge {% if m.recyclable == 'Yes' %}badge-green{% else %}badge-red{% endif %}"
+                >
+                  Recyclable: {{ m.recyclable }}
+                </span>
+                <span class="badge">Bin: {{ m.bin }}</span>
+                <span class="badge"
+                  >~ {{ '%.2f'|format(m.est_weight) }} kg</span
+                >
+                <span class="badge"
+                  >Scrap ₹{{ '%.1f'|format(m.est_scrap) }}</span
+                >
+              </div>
+              <p class="material-note">{{ m.note }}</p>
+              <p class="material-action">
+                <strong>Suggested Action:</strong> {{ m.action }}
+              </p>
+            </div>
+            {% endfor %}
+          </div>
+
+          <div class="panel-footer">
+            <form method="POST" action="/download">
+              <input type="hidden" name="summary" value="{{ pdf_summary }}" />
+              <input type="hidden" name="details" value="{{ pdf_details }}" />
+              <input type="hidden" name="image_path" value="{{ pdf_image }}" />
+              <input type="hidden" name="pie_path" value="{{ pdf_pie }}" />
+              <input type="hidden" name="bar_path" value="{{ pdf_bar }}" />
+              <button class="btn-primary" type="submit">
+                Download PDF Report
+              </button>
+            </form>
+          </div>
+          {% else %}
+          <p class="empty-state">
+            Material-wise insights and smart actions will appear after
+            prediction.
+          </p>
+          {% endif %}
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

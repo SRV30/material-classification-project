@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Mobile Camera</title>
+<style>
+body { background:#020617; color:#fff; text-align:center; font-family:Poppins; }
+video { width:92%; margin-top:12px; border-radius:15px; border:2px solid #00d4ff; }
+button { margin:10px; padding:10px 18px; border-radius:8px; font-size:15px; border:none; cursor:pointer; }
+.btn { background:#00d4ff; color:#000; }
+</style>
+</head>
+<body>
+
+<h2>📱 Mobile Camera — AI Detection</h2>
+<video id="video" autoplay playsinline></video>
+
+<button class="btn" onclick="startFront()">Front Camera</button>
+<button class="btn" onclick="startBack()">Back Camera</button>
+<button class="btn" onclick="capture()">Capture → Analyse</button>
+
+<form id="uploadForm" action="/predict" method="POST" enctype="multipart/form-data" style="display:none;">
+  <input type="file" id="fileInput" name="image">
+</form>
+
+<script>
+let video = document.getElementById("video");
+
+function startFront(){
+  navigator.mediaDevices.getUserMedia({video:{facingMode:"user"}})
+  .then(s => video.srcObject = s);
+}
+
+function startBack(){
+  navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"}})
+  .then(s => video.srcObject = s)
+  .catch(() => startFront());
+}
+
+function capture(){
+  let c = document.createElement("canvas");
+  c.width = video.videoWidth;
+  c.height = video.videoHeight;
+  c.getContext("2d").drawImage(video, 0, 0);
+
+  c.toBlob(blob => {
+    let f = new File([blob], "mobile_" + Date.now() + ".jpg", { type: "image/jpeg" });
+    let d = new DataTransfer();
+    d.items.add(f);
+    document.getElementById("fileInput").files = d.files;
+    document.getElementById("uploadForm").submit();
+  }, "image/jpeg", 0.92);
+}
+
+startBack();
+</script>
+</body>
+</html>

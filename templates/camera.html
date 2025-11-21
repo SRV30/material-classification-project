@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Live Camera Detection</title>
+<style>
+body { background:#020617; font-family:Poppins; text-align:center; color:white; }
+img { width:75%; border:3px solid #00b7ff; border-radius:12px; margin-top:20px; }
+button { margin-top:15px; padding:10px 18px; border:none; border-radius:8px; cursor:pointer; font-size:15px; }
+.cap { background:#00ff95; color:#020617; }
+.stop { background:#ff5050; color:white; }
+.back { background:#00b7ff; color:#020617; }
+.mobile { background:#ffdd29; color:#020617; }
+</style>
+</head>
+
+<body>
+<h2>Live Material Detection</h2>
+<img src="/video_feed">
+
+<br>
+<button class="cap" onclick="location.href='/capture'">📸 Capture Image</button>
+<button class="stop" onclick="location.href='/stop_camera'">⛔ Stop</button>
+<button class="back" onclick="location.href='/'">🏠 Home</button>
+<button class="mobile" onclick="location.href='/mobile_camera'">📱 Mobile Camera</button>
+</body>
+</html>
